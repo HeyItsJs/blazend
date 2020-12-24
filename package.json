@@ -7,6 +7,7 @@
   "scripts": {
     "tsc": "tsc",
     "build": "rm -rf ./dist/ && npm run tsc",
+    "pub": "npm i && npm run build && npm publish",
     "test": "mocha -r ts-node/register src/**/*.test.ts",
     "test-watch": "mocha -r ts-node/register src/**/*.test.ts --watch --watch-files src/**/*",
     "coverage": "nyc -r lcov npm run test"
