@@ -6,7 +6,7 @@ import { CallbackFunction, Service } from "./service";
 // Creates a router handler for a given function handler
 function createAPIHandler(secret: string, modules: Modules, services: Map<string, Service>): RequestHandler {
   return (req: any, res: any) => {
-    const cb: CallbackFunction = (statusCode, response =  {}) => {
+    const cb: CallbackFunction = (statusCode, response = {}) => {
       res.status(statusCode).json(response);
     };
 
@@ -46,7 +46,7 @@ export function initRouter(secret: string, modules: Modules, services: Map<strin
   router.use(express.json());
 
   // Initialize routes
-  router.post("/v1/api/:serviceName/:funcName", createAPIHandler(secret, modules, services));
+  router.post("/v1/api/services/:serviceName/:funcName", createAPIHandler(secret, modules, services));
 
   return router;
 }

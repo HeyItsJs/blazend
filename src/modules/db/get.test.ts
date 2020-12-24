@@ -8,9 +8,13 @@ let db: DBModule;
 
 before(() => {
   db = initDBModule({
-    dbType: "postgres",
-    conn: "postgres://postgres:mysecretpassword@localhost:5432/postgres",
-    schema: "public",
+    config: {
+      dbType: "postgres",
+      conn: "postgres://postgres:mysecretpassword@localhost:5432/postgres",
+      schema: "public",
+    },
+    onConnectionSuccess: () => console.log("Successfully connected to database!"),
+    onConnectionFailure: (error) => console.log("Error connecting to database:", error),
   });
 });
 

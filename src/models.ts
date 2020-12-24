@@ -2,6 +2,14 @@ import { DBModule } from "./modules/db";
 
 type DBType = "postgres" | "mysql" | "sqlite";
 
+export interface DBConnectionSuccessCallback {
+  (): void;
+}
+
+export interface DBConnectionFailureCallback {
+  (error: Error): void;
+}
+
 export interface DBConfig {
   dbType: DBType;
   conn: string;
@@ -9,8 +17,14 @@ export interface DBConfig {
   pool?: any;
 }
 
+export interface DBModuleConfig {
+  config: DBConfig;
+  onConnectionSuccess?: DBConnectionSuccessCallback;
+  onConnectionFailure?: DBConnectionFailureCallback;
+}
+
 export interface AppConfig {
-  db?: DBConfig;
+  db?: DBModuleConfig;
   jwtSecret: string;
 }
 

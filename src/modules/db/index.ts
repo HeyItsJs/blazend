@@ -1,5 +1,5 @@
 import Knex, { Config } from "knex";
-import { DBConfig, JSONMap, OperationType } from "../../models";
+import { DBConfig, JSONMap, OperationType, DBModuleConfig } from "../../models";
 import { Batch } from "./batch";
 import { Delete } from "./delete";
 import { Get } from "./get";
@@ -9,9 +9,20 @@ import { Update } from "./update";
 export class DBModule {
   driver: Knex;
 
-  constructor(dbConfig: DBConfig) {
-    const knexConfig = createKnexConfig(dbConfig);
+  constructor(dbModuleConfig: DBModuleConfig) {
+    const knexConfig = createKnexConfig(dbModuleConfig.config);
     this.driver = Knex(knexConfig);
+    this.ping()
+      .then(() => {
+        if (dbModuleConfig.onConnectionSuccess) {
+          dbModuleConfig.onConnectionSuccess();
+        }
+      })
+      .catch((error) => {
+        if (dbModuleConfig.onConnectionFailure) {
+          dbModuleConfig.onConnectionFailure(error);
+        }
+      });
   }
 
   get(tableName: string) {
@@ -82,13 +93,6 @@ function createKnexConfig(dbConfig: DBConfig): Config {
   }
 }
 
-export function initDBModule(dbConfig: DBConfig): DBModule {
-  const dbModule = new DBModule(dbConfig);
-
-  dbModule
-    .ping()
-    .then(() => console.log("Successfully connected to database!"))
-    .catch((error) => console.log("Error connecting to database:", error));
-
-  return dbModule;
+export function initDBModule(dbModuleConfig: DBModuleConfig): DBModule {
+  return new DBModule(dbModuleConfig);
 }
