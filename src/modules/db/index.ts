@@ -1,10 +1,14 @@
 import Knex, { Config } from "knex";
 import { DBConfig, JSONMap, OperationType, DBModuleConfig } from "../../models";
-import { Batch } from "./batch";
+import { DBTransaction } from "./transaction";
 import { Delete } from "./delete";
 import { Get } from "./get";
 import { Insert } from "./insert";
 import { Update } from "./update";
+
+interface DBTransactionCallback {
+  (trx: DBTransaction): Promise<any>;
+}
 
 export class DBModule {
   driver: Knex;
@@ -45,8 +49,11 @@ export class DBModule {
     return new Delete(this.driver, tableName);
   }
 
-  initBatch() {
-    return new Batch(this.driver);
+  transaction(cb: DBTransactionCallback) {
+    return this.driver.transaction(async (trx) => {
+      const dbTrx = new DBTransaction(trx);
+      await cb(dbTrx);
+    });
   }
 
   ping() {
@@ -73,12 +80,14 @@ function createKnexConfig(dbConfig: DBConfig): Config {
         client: "pg",
         connection: dbConfig.conn,
         searchPath: dbConfig.schema ? [dbConfig.schema] : ["public"],
+        debug: dbConfig.debug,
       };
 
     case "mysql":
       return {
         client: "mysql",
         connection: dbConfig.conn,
+        debug: dbConfig.debug,
       };
 
     case "sqlite":
@@ -87,6 +96,7 @@ function createKnexConfig(dbConfig: DBConfig): Config {
         connection: {
           filename: dbConfig.conn,
         },
+        debug: dbConfig.debug,
       };
     default:
       throw new Error("Unsupported database: " + dbConfig.dbType);

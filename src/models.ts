@@ -15,6 +15,7 @@ export interface DBConfig {
   conn: string;
   schema?: string;
   pool?: any;
+  debug?: boolean;
 }
 
 export interface DBModuleConfig {
