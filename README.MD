@@ -1,83 +1,228 @@
+# Blazend
+
+Blazend is a backend framework to build CRUD applications faster and easily in NodeJS/Typescript.
+
+It provides a simple and sweet, yet flexible abstraction over [express](https://expressjs.com/) and [knex](https://knexjs.org/) to increase developer productivity. 
+
 ## Install
 
 ```bash
-npm i blazend
+$ npm i blazend
+
+# Then add one of the following:
+$ npm install pg
+$ npm install sqlite3
+$ npm install mysql
+$ npm install mysql2
 ```
 
-## Usage on backend
+## Initialization
 
 ```js
 const { App } = require('blazend');
 
 const appConfig = {
   db: {
-    conn: "postgres://root:mysecret-password@localhost:5432/mydb",
-    schema: "public",
-    pool: { min: 2, max: 10 }
+    config: {
+      dbType: "postgres|mysql|sqlite",
+      conn: "<connection-string>",
+      schema: "<schema>", // Applicable for `postgres` only
+      debug: true|false // To turn the debugging of knex 
+    },
+    onConnectionSuccess: () => {},
+    onConnectionError: (error) => {}
   },
-  secrets: [
-    {
-      alg: "hs256",
-      secret: "some-secret"
-    }
-  ]
+  jwtSecret: "<some-secret>"
 }
 
-// Initialize app
 const app = new App(appConfig)
-
-// Register your services
-app.registerService('service1', service1)
-app.registerService('service2', service2)
-
-// Start your app
-app.start(8080, () => console.log("App is listening on port 8080!"))
 ```
 
-### Writing a service
+**Example:** Initializing to use postgres:
 
 ```js
-const { Service } = require('blazend');
+import { App } from "blazend";
 
-const service1 = new Service()
+const appConfig = {
+  db: {
+    config: {
+      dbType: "postgres",
+      conn: "postgres://postgres:mysecretpassword@localhost:5432/postgres",
+      schema: "public",
+      debug: true
+    },
+    onConnectionSuccess: () => console.log("Successfully connected to database!"),
+    onConnectionError: (error) => console.log("Error connecting to database", error)
+  },
+  jwtSecret: "some-secret"
+}
 
-// Register functions to service
-service1.registerFunc('func1', func1)
-service1.registerFunc('func2', func2)
+const app = new App(appConfig)
 ```
 
-**Example:** Writing a users service with a `getProfile` function:
+## Writing services
 
 ```js
-const { Service } = require('blazend');
+import { Service } = from "blazend";
 
-const usersService = new Service();
+const greeterService = new Service();
 
-usersService.registerFunc('getProfile', (cb, api, auth, params, queryParams) => {
-  if (!auth) {
-    cb(401, { error: "You are not logged in!" })
-    return
-  }
+// Register functions to your service
+greeterService.registerFunc("welcome", (cb, modules, auth, params) => {
+  // cb is used to send response back to client
+  // modules contains the database module
+  // auth is the parsed JWT claims
+  // params is the request body
 
-  try {
-    const res = await api.db.query("select * from users where id = $userId", { userId: auth.id })
-
-    if (res.rows.length === 0) {
-      cb(400, "No such user!")
-      return
-    }
-
-    const userObject = res.rows[0]
-    cb(200, userObject)
-    
-  } catch (e) {
-    console.log("Error:", e)
-    cb(500, "Error creating user!")
-  }
+  const { name } = params;
+  const responseObj = { msg: `Welcome ${name}!` }
+  cb(200, { msg})
 })
+
+app.registerService("greeter", greeterService);
 ```
 
-## Usage on frontend
+The above example creates the following REST endpoint:
+
+`POST` `/v1/api/services/greeter/welcome`
+
+You can register multiple functions to a service and multiple services to an app.
+
+## Performing CRUD operations
+
+`modules.db` available inside each function handler is simple wrapper over knex. You can use it to perform CRUD operations with it inside your services. 
+
+Below are examples for various operations
+
+### Inserting one record
+
+```js
+const user = { id: 1, name: "John" }
+try {
+  await modules.db.insert("users").doc(user).apply()
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Inserting multiple records
+
+```js
+const users = [
+  { id: 1, name: "John" },
+  { id: 2, name: "Jack" }
+]
+
+try {
+  await modules.db.insert("users").docs(users).apply()
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Reading one record
+
+```js
+import { cond } from "blazend";
+
+try {
+  const user = await modules.db.get("users").where(cond("id", "==", 1)).apply()
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Reading multiple record
+
+```js
+import { cond, and, or } from "blazend";
+
+try {
+  const whereClause = or(
+    cond("role", "==", "admin"),
+    and(
+      cond("country", "==", "India"),
+      cond("billing_enabled", "==", true)
+    )
+  )
+
+  const sortOptions = [{ column: "age", order: "desc" }, { column: "name", order: "asc" }]
+
+  const users = await modules.db.get("users")
+    .select("id", "name", "age")
+    .where(whereClause)
+    .sort(sortOptions)
+    .limit(10)
+    .offset(50)
+    .apply()
+
+  console.log("Users", users)
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Updating records
+
+```js
+import { cond } from "blazend";
+
+try {
+  await modules.db.update("users").where(cond("id", "==", 1)).set({ name: "Jack" }).apply()
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Deleting records
+
+```js
+import { cond } from "blazend";
+
+try {
+  await modules.db.delete("users").where(cond("id", "==", 1)).apply()
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Transactions
+
+```js
+import { cond } from "blazend";
+
+try {
+  await modules.db.transaction(trx => {
+    const user = { id: 1, name: "John" }
+    await trx.insert("users").doc(user).apply()
+    await trx.update("users").where(cond("id", "==", 2)).set({ name: "Jack" }).apply()
+  })
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+### Executing prepared queries
+
+```js
+try {
+  await modules.db.rawExec("select * from users where id = :userId", { userId: 1 }).apply()
+} catch (error) {
+  console.log("Error", error)
+}
+```
+
+## Starting app
+
+```js
+app.start(port)
+```
+
+This starts the express app
+
+## Usage on the frontend
+
+Since blazend creates standard JSON based REST APIs, they can be used with any http clients. However for the sake of simplicity, we have created a client library for javascript apps - [blazend-js](https://github.com/HeyItsJs/blazend-js)
 
 Install:
 
@@ -85,35 +230,24 @@ Install:
 npm i blazend-js
 ```
 
-Initialize: 
+Usage: 
 
 ```js
-import { Client } from "blazend-client";
+import { API } from "blazend-client";
 
-const client = new Client('http://localhost:8080/')
+const api = new Client('http://localhost:8080/')
+
+// Call functions registered on backend
+api.call("service-name", "function-name", requestBody)
 ```
 
-Call a function:
+**Example:**
 
 ```js
 try {
-  const { status, result } = await client.call('service1', 'func1', paramsObject)
+  const { status, result } = await client.call('greeter', 'welcome', { name: "John" })
   console.log(status, result)
 } catch (e) {
   console.log("Error:", e)
 }
-```
-
-## Recommended project structure on backend
-
-```
-|-- config // Config of the app
-|-- constants
-|-- index.js
-|-- scripts // Scripts to build/deploy/test your app/services
-|-- services
-|   |-- service1
-|       |-- index.js // Initializes the service and resgisters the functions
-|       |-- functions.js // Holds all the functions
-|       |-- db.js // Database queries
 ```
