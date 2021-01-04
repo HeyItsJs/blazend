@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import express, { Express, RequestHandler } from "express";
+import cors, { CorsOptions } from "cors";
 import { Modules } from "./models";
 import { CallbackFunction, Service } from "./service";
 
@@ -40,9 +41,19 @@ function createAPIHandler(secret: string, modules: Modules, services: Map<string
   };
 }
 
-export function initRouter(secret: string, modules: Modules, services: Map<string, Service>): Express {
+export function initRouter(
+  corsOptions: CorsOptions | undefined,
+  secret: string,
+  modules: Modules,
+  services: Map<string, Service>,
+): Express {
   // Initialize express router
   const router = express();
+
+  if (corsOptions) {
+    router.use(cors(corsOptions));
+  }
+
   router.use(express.json());
 
   // Initialize routes

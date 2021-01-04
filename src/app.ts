@@ -18,7 +18,7 @@ export class App {
     this.modules = initModules(appConfig);
 
     // Initialize express router
-    this.router = initRouter(this.appConfig.jwtSecret, this.modules, this.services);
+    this.router = initRouter(this.appConfig.corsConfig, this.appConfig.jwtSecret, this.modules, this.services);
   }
 
   registerService(serviceName: string, service: Service): void {
