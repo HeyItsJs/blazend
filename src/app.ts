@@ -21,11 +21,11 @@ export class App {
     this.router = initRouter(this.appConfig.jwtSecret, this.modules, this.services);
   }
 
-  registerService(serviceName: string, service: Service) {
+  registerService(serviceName: string, service: Service): void {
     this.services.set(serviceName, service);
   }
 
-  start(port: Number) {
+  start(port: number): void {
     this.router
       .listen(port, () => console.log(`App is listening on port ${port.toString()}!`))
       .on("error", (err: Error) => console.error(`Error listening on port ${port.toString()}`, err));
