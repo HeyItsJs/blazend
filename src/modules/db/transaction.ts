@@ -1,5 +1,5 @@
 import { Transaction } from "knex";
-import { OperationType } from "../../models";
+import { JSONMap, OperationType } from "../../models";
 import { Delete } from "./delete";
 import { Get } from "./get";
 import { Insert } from "./insert";
@@ -30,5 +30,16 @@ export class DBTransaction {
 
   delete(tableName: string) {
     return new Delete(this.trx, tableName);
+  }
+
+  rawExec<T>(sql: string, params: JSONMap): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.trx
+        .raw(sql, params)
+        .then((res) => {
+          resolve(res.rows);
+        })
+        .catch((ex) => reject(ex));
+    });
   }
 }
