@@ -11,7 +11,7 @@ function createAPIHandler(secret: string, modules: Modules, services: Map<string
     const cb: CallbackFunction = (statusCode, response = {}) => {
       const endingTime = new Date().getTime();
       const executionTime = endingTime - startingTime;
-      res.set({ EXEC_TIME: executionTime }).status(statusCode).json(response);
+      res.status(statusCode).json({ result: response, execTime: executionTime });
     };
 
     const { serviceName, funcName } = req.params;
