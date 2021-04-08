@@ -7,8 +7,11 @@ import { CallbackFunction, Service } from "./service";
 // Creates a router handler for a given function handler
 function createAPIHandler(secret: string, modules: Modules, services: Map<string, Service>): RequestHandler {
   return (req: any, res: any) => {
+    const startingTime = new Date().getTime();
     const cb: CallbackFunction = (statusCode, response = {}) => {
-      res.status(statusCode).json(response);
+      const endingTime = new Date().getTime();
+      const executionTime = endingTime - startingTime;
+      res.set({ EXEC_TIME: executionTime }).status(statusCode).json(response);
     };
 
     const { serviceName, funcName } = req.params;
