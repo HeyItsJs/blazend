@@ -1,6 +1,6 @@
 import { App } from "./app";
 import { Service, ServiceFunction, CallbackFunction } from "./service";
-import { AppConfig, DBModuleConfig } from "./models";
+import { AppConfig, DBModuleConfig, FuncType } from "./models";
 import { cond, and, or } from "./modules/db/helpers";
 import { SortOption } from "./modules/db/get";
 
@@ -15,4 +15,5 @@ export {
   and,
   or,
   SortOption,
+  FuncType,
 };

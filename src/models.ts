@@ -73,3 +73,8 @@ export const operatorMappings: { [key: string]: string } = {
   isNotNull: "isNotNull",
   like: "like",
 };
+
+export enum FuncType {
+  Post = "POST",
+  Get = "GET",
+}

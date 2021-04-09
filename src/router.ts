@@ -1,11 +1,17 @@
 import jwt from "jsonwebtoken";
 import express, { Express, RequestHandler } from "express";
 import cors, { CorsOptions } from "cors";
-import { Modules } from "./models";
+import { FuncType, Modules } from "./models";
 import { CallbackFunction, Service } from "./service";
+import qs from "qs";
 
 // Creates a router handler for a given function handler
-function createAPIHandler(secret: string, modules: Modules, services: Map<string, Service>): RequestHandler {
+function createAPIHandler(
+  secret: string,
+  modules: Modules,
+  services: Map<string, Service>,
+  funcType: FuncType,
+): RequestHandler {
   return (req: any, res: any) => {
     const startingTime = new Date().getTime();
     const cb: CallbackFunction = (statusCode, response = {}) => {
@@ -22,13 +28,13 @@ function createAPIHandler(secret: string, modules: Modules, services: Map<string
       return;
     }
 
-    const func = service.getFunction(funcName);
+    const func = service.getFunction(funcName, funcType);
     if (!func) {
       cb(400, { error: "The specified function is not registered." });
       return;
     }
 
-    const params = req.body;
+    const params = funcType === FuncType.Get ? qs.parse(req.query) : req.body;
     let auth;
     const authorizationHeader = req.get("Authorization");
     if (authorizationHeader) {
@@ -60,7 +66,8 @@ export function initRouter(
   router.use(express.json());
 
   // Initialize routes
-  router.post("/v1/api/services/:serviceName/:funcName", createAPIHandler(secret, modules, services));
+  router.get("/v1/api/services/:serviceName/:funcName", createAPIHandler(secret, modules, services, FuncType.Get));
+  router.post("/v1/api/services/:serviceName/:funcName", createAPIHandler(secret, modules, services, FuncType.Post));
 
   return router;
 }
