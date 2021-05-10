@@ -10,14 +10,19 @@ enum ConditionType {
 export interface Condition {
   f1?: string;
   f2?: any;
+  f1Array?: readonly string[];
   op?: Operator;
   type: ConditionType;
   clauses?: Array<Condition>;
 }
 
-export function cond(f1: string, op: Operator, f2?: any): Condition {
+export function cond(f1: string | string[], op: Operator, f2?: any): Condition {
+  if (op !== "in" && op !== "notIn" && typeof f1 !== "string") {
+    throw new Error("Operator type can be string[] only for 'in' and 'notIn' operators!");
+  }
   return {
-    f1,
+    f1: typeof f1 === "string" ? f1 : "",
+    f1Array: typeof f1 !== "string" ? f1 : [],
     f2,
     op,
     type: ConditionType.Cond,
@@ -76,16 +81,32 @@ export const generateWhere = (builder: QueryBuilder, c: Condition, parentCondTyp
           return;
         case "in":
           if (parentCondType === ConditionType.Or) {
-            builder.orWhereIn(c.f1, c.f2);
+            if (c.f1Array && c.f1Array.length) {
+              builder.orWhereIn(c.f1Array, c.f2);
+            } else {
+              builder.orWhereIn(c.f1, c.f2);
+            }
           } else {
-            builder.whereIn(c.f1, c.f2);
+            if (c.f1Array && c.f1Array.length) {
+              builder.whereIn(c.f1Array, c.f2);
+            } else {
+              builder.whereIn(c.f1, c.f2);
+            }
           }
           return;
         case "notIn":
           if (parentCondType === ConditionType.Or) {
-            builder.orWhereNotIn(c.f1, c.f2);
+            if (c.f1Array && c.f1Array.length) {
+              builder.orWhereNotIn(c.f1Array, c.f2);
+            } else {
+              builder.orWhereNotIn(c.f1, c.f2);
+            }
           } else {
-            builder.whereNotIn(c.f1, c.f2);
+            if (c.f1Array && c.f1Array.length) {
+              builder.whereNotIn(c.f1Array, c.f2);
+            } else {
+              builder.whereNotIn(c.f1, c.f2);
+            }
           }
           return;
         case "isNull":
