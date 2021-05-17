@@ -18,6 +18,31 @@ export class Get {
     this.op = op;
   }
 
+  leftJoin(table: string, f1: string, f2: string) {
+    this.queryBuilder.leftJoin(table, f1, f2);
+    return this;
+  }
+
+  leftOuterJoin(table: string, f1: string, f2: string) {
+    this.queryBuilder.leftOuterJoin(table, f1, f2);
+    return this;
+  }
+
+  rightOuterJoin(table: string, f1: string, f2: string) {
+    this.queryBuilder.rightOuterJoin(table, f1, f2);
+    return this;
+  }
+
+  fullOuterJoin(table: string, f1: string, f2: string) {
+    this.queryBuilder.fullOuterJoin(table, f1, f2);
+    return this;
+  }
+
+  innerJoin(table: string, f1: string, f2: string) {
+    this.queryBuilder.innerJoin(table, f1, f2);
+    return this;
+  }
+
   select(...fields: string[]) {
     this.queryBuilder = this.queryBuilder.select(fields);
     return this;
