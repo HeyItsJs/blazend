@@ -56,6 +56,10 @@ export class DBModule {
     });
   }
 
+  ref(fieldName: string) {
+    return this.driver.ref(fieldName);
+  }
+
   ping() {
     return this.driver.raw("select 1 + 1");
   }
