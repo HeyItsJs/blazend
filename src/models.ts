@@ -1,4 +1,3 @@
-import { CorsOptions } from "cors";
 import { DBModule } from "./modules/db";
 
 type DBType = "postgres" | "mysql" | "sqlite";
@@ -27,8 +26,6 @@ export interface DBModuleConfig {
 
 export interface AppConfig {
   db?: DBModuleConfig;
-  jwtSecret: string;
-  corsConfig?: CorsOptions;
 }
 
 export interface Modules {
@@ -73,8 +70,3 @@ export const operatorMappings: { [key: string]: string } = {
   isNotNull: "isNotNull",
   like: "like",
 };
-
-export enum FuncType {
-  Post = "POST",
-  Get = "GET",
-}
