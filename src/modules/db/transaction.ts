@@ -12,27 +12,27 @@ export class DBTransaction {
     this.trx = trx;
   }
 
-  get(tableName: string) {
+  get(tableName: string): Get {
     return new Get(this.trx, tableName, OperationType.All);
   }
 
-  getOne(tableName: string) {
+  getOne(tableName: string): Get {
     return new Get(this.trx, tableName, OperationType.One);
   }
 
-  insert(tableName: string) {
+  insert(tableName: string): Insert {
     return new Insert(this.trx, tableName);
   }
 
-  update(tableName: string) {
+  update(tableName: string): Update {
     return new Update(this.trx, tableName);
   }
 
-  delete(tableName: string) {
+  delete(tableName: string): Delete {
     return new Delete(this.trx, tableName);
   }
 
-  rawExec<T>(sql: string, params: JSONMap): Promise<T> {
+  async rawExec<T>(sql: string, params: JSONMap): Promise<T> {
     return new Promise((resolve, reject) => {
       this.trx
         .raw(sql, params)

@@ -7,22 +7,22 @@ export class Insert {
     this.queryBuilder = driver(table);
   }
 
-  doc(doc: any) {
+  doc(doc: any): Insert {
     this.queryBuilder = this.queryBuilder.insert([doc]);
     return this;
   }
 
-  docs(docs: any[]) {
+  docs(docs: any[]): Insert {
     this.queryBuilder = this.queryBuilder.insert(docs);
     return this;
   }
 
-  returning(...fields: string[]) {
+  returning(...fields: string[]): Insert {
     this.queryBuilder = this.queryBuilder.returning(fields);
     return this;
   }
 
-  transacting(trx: Transaction) {
+  transacting(trx: Transaction): Insert {
     this.queryBuilder = this.queryBuilder.transacting(trx);
     return this;
   }
@@ -31,7 +31,7 @@ export class Insert {
     return this.queryBuilder.toSQL();
   }
 
-  apply<T>(): Promise<T> {
+  async apply<T>(): Promise<T> {
     return new Promise((resolve, reject) => this.queryBuilder.then((res) => resolve(res)).catch((ex) => reject(ex)));
   }
 }

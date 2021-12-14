@@ -8,24 +8,24 @@ export class Update {
     this.queryBuilder = driver(table);
   }
 
-  where(condition: Condition) {
+  where(condition: Condition): Update {
     this.queryBuilder = this.queryBuilder.where((builder: QueryBuilder) => {
       generateWhere(builder, condition, condition.type);
     });
     return this;
   }
 
-  set(doc: any) {
+  set(doc: any): Update {
     this.queryBuilder = this.queryBuilder.update(doc);
     return this;
   }
 
-  returning(...fields: string[]) {
+  returning(...fields: string[]): Update {
     this.queryBuilder = this.queryBuilder.returning(fields);
     return this;
   }
 
-  transacting(trx: Transaction) {
+  transacting(trx: Transaction): Update {
     this.queryBuilder = this.queryBuilder.transacting(trx);
     return this;
   }
@@ -34,7 +34,7 @@ export class Update {
     return this.queryBuilder.toSQL();
   }
 
-  apply<T>(): Promise<T> {
+  async apply<T>(): Promise<T> {
     return new Promise((resolve, reject) => this.queryBuilder.then((res) => resolve(res)).catch((ex) => reject(ex)));
   }
 }

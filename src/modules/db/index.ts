@@ -29,27 +29,27 @@ export class DBModule {
       });
   }
 
-  get(tableName: string) {
+  get(tableName: string): Get {
     return new Get(this.driver, tableName, OperationType.All);
   }
 
-  getOne(tableName: string) {
+  getOne(tableName: string): Get {
     return new Get(this.driver, tableName, OperationType.One);
   }
 
-  insert(tableName: string) {
+  insert(tableName: string): Insert {
     return new Insert(this.driver, tableName);
   }
 
-  update(tableName: string) {
+  update(tableName: string): Update {
     return new Update(this.driver, tableName);
   }
 
-  delete(tableName: string) {
+  delete(tableName: string): Delete {
     return new Delete(this.driver, tableName);
   }
 
-  transaction(cb: DBTransactionCallback) {
+  async transaction(cb: DBTransactionCallback): Promise<void> {
     return this.driver.transaction(async (trx) => {
       const dbTrx = new DBTransaction(trx);
       await cb(dbTrx);
@@ -60,11 +60,11 @@ export class DBModule {
     return this.driver.ref(fieldName);
   }
 
-  ping() {
+  async ping() {
     return this.driver.raw("select 1 + 1");
   }
 
-  rawExec<T>(sql: string, params: JSONMap): Promise<T> {
+  async rawExec<T>(sql: string, params: JSONMap): Promise<T> {
     return new Promise((resolve, reject) => {
       this.driver
         .raw(sql, params)

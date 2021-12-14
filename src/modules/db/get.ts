@@ -18,54 +18,54 @@ export class Get {
     this.op = op;
   }
 
-  leftJoin(table: string, f1: string, f2: string) {
+  leftJoin(table: string, f1: string, f2: string): Get {
     this.queryBuilder.leftJoin(table, f1, f2);
     return this;
   }
 
-  leftOuterJoin(table: string, f1: string, f2: string) {
+  leftOuterJoin(table: string, f1: string, f2: string): Get {
     this.queryBuilder.leftOuterJoin(table, f1, f2);
     return this;
   }
 
-  rightOuterJoin(table: string, f1: string, f2: string) {
+  rightOuterJoin(table: string, f1: string, f2: string): Get {
     this.queryBuilder.rightOuterJoin(table, f1, f2);
     return this;
   }
 
-  fullOuterJoin(table: string, f1: string, f2: string) {
+  fullOuterJoin(table: string, f1: string, f2: string): Get {
     this.queryBuilder.fullOuterJoin(table, f1, f2);
     return this;
   }
 
-  innerJoin(table: string, f1: string, f2: string) {
+  innerJoin(table: string, f1: string, f2: string): Get {
     this.queryBuilder.innerJoin(table, f1, f2);
     return this;
   }
 
-  select(...fields: string[]) {
+  select(...fields: string[]): Get {
     this.queryBuilder = this.queryBuilder.select(fields);
     return this;
   }
 
-  where(condition: Condition) {
+  where(condition: Condition): Get {
     this.queryBuilder = this.queryBuilder.where((builder: QueryBuilder) => {
       generateWhere(builder, condition, condition.type);
     });
     return this;
   }
 
-  sort(sortOptions: Array<SortOption>) {
+  sort(sortOptions: Array<SortOption>): Get {
     this.queryBuilder = this.queryBuilder.orderBy(sortOptions);
     return this;
   }
 
-  offset(noOfRows: number) {
+  offset(noOfRows: number): Get {
     this.queryBuilder = this.queryBuilder.offset(noOfRows);
     return this;
   }
 
-  limit(noOfRows: number) {
+  limit(noOfRows: number): Get {
     this.queryBuilder = this.queryBuilder.limit(noOfRows);
     return this;
   }
@@ -74,7 +74,7 @@ export class Get {
     return this.queryBuilder.toSQL();
   }
 
-  apply<T>(): Promise<T> {
+  async apply<T>(): Promise<T> {
     return new Promise((resolve, reject) => {
       this.queryBuilder
         .then((res) => {

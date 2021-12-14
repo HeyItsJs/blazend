@@ -8,19 +8,19 @@ export class Delete {
     this.queryBuilder = driver(table).delete();
   }
 
-  where(condition: Condition) {
+  where(condition: Condition): Delete {
     this.queryBuilder = this.queryBuilder.where((builder: QueryBuilder) => {
       generateWhere(builder, condition, condition.type);
     });
     return this;
   }
 
-  returning(...fields: string[]) {
+  returning(...fields: string[]): Delete {
     this.queryBuilder = this.queryBuilder.returning(fields);
     return this;
   }
 
-  transacting(trx: Transaction) {
+  transacting(trx: Transaction): Delete {
     this.queryBuilder = this.queryBuilder.transacting(trx);
     return this;
   }
@@ -29,7 +29,7 @@ export class Delete {
     return this.queryBuilder.toSQL();
   }
 
-  apply<T>(): Promise<T> {
+  async apply<T>(): Promise<T> {
     return new Promise((resolve, reject) => this.queryBuilder.then((res) => resolve(res)).catch((ex) => reject(ex)));
   }
 }
