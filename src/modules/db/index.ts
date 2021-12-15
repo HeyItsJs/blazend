@@ -85,6 +85,7 @@ function createKnexConfig(dbConfig: DBConfig): Config {
         connection: dbConfig.conn,
         searchPath: dbConfig.schema ? [dbConfig.schema] : ["public"],
         debug: dbConfig.debug,
+        asyncStackTraces: true,
       };
 
     case "mysql":
@@ -92,6 +93,7 @@ function createKnexConfig(dbConfig: DBConfig): Config {
         client: "mysql",
         connection: dbConfig.conn,
         debug: dbConfig.debug,
+        asyncStackTraces: true,
       };
 
     case "sqlite":
@@ -101,6 +103,7 @@ function createKnexConfig(dbConfig: DBConfig): Config {
           filename: dbConfig.conn,
         },
         debug: dbConfig.debug,
+        asyncStackTraces: true,
       };
     default:
       throw new Error("Unsupported database: " + dbConfig.dbType);

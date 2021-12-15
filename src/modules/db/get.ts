@@ -75,22 +75,14 @@ export class Get {
   }
 
   async apply<T>(): Promise<T> {
-    return new Promise((resolve, reject) => {
-      this.queryBuilder
-        .then((res) => {
-          if (this.op === OperationType.One) {
-            if (res.length === 0) {
-              reject(new Error("No matching record found!"));
-              return;
-            }
+    const res = await this.queryBuilder;
+    if (this.op === OperationType.One) {
+      if (res.length === 0) {
+        throw new Error("No matching record found!");
+      }
 
-            resolve(res[0]);
-            return;
-          }
-
-          resolve(res);
-        })
-        .catch((ex) => reject(ex));
-    });
+      return res[0];
+    }
+    return res;
   }
 }
