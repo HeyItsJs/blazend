@@ -40,6 +40,19 @@ describe("get", function () {
     expect(sql.bindings.toString()).equal(expectedBindings.toString());
   });
 
+  it("generates correct SQL query with schema", function () {
+    const sql = db
+      .get("users")
+      .withSchema("myschema")
+      .select("id", "name")
+      .toSQL();
+
+    const expectedSQL = `select "id", "name" from "myschema"."users"`;
+    const expectedBindings: any[] = [];
+    expect(sql.sql).equal(expectedSQL);
+    expect(sql.bindings.toString()).equal(expectedBindings.toString());
+  });
+
   it("generates correct where clauses for all operators", function () {
     const testCases = [
       {

@@ -8,6 +8,11 @@ export class Update {
     this.queryBuilder = driver(table);
   }
 
+  withSchema(schemaName: string): Update {
+    this.queryBuilder.withSchema(schemaName);
+    return this;
+  }
+
   where(condition: Condition): Update {
     this.queryBuilder = this.queryBuilder.where((builder: QueryBuilder) => {
       generateWhere(builder, condition, condition.type);

@@ -18,6 +18,11 @@ export class Get {
     this.op = op;
   }
 
+  withSchema(schemaName: string): Get {
+    this.queryBuilder.withSchema(schemaName);
+    return this;
+  }
+
   leftJoin(table: string, f1: string, f2: string): Get {
     this.queryBuilder.leftJoin(table, f1, f2);
     return this;

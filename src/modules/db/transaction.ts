@@ -12,6 +12,11 @@ export class DBTransaction {
     this.driver = trx;
   }
 
+  withSchema(schemaName: string): DBTransaction {
+    this.driver.withSchema(schemaName);
+    return this;
+  }
+
   get(tableName: string): Get {
     return new Get(this.driver, tableName, OperationType.All);
   }

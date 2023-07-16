@@ -7,6 +7,11 @@ export class Insert {
     this.queryBuilder = driver(table);
   }
 
+  withSchema(schemaName: string): Insert {
+    this.queryBuilder.withSchema(schemaName);
+    return this;
+  }
+
   doc(doc: any): Insert {
     this.queryBuilder = this.queryBuilder.insert([doc]);
     return this;

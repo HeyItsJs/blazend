@@ -8,6 +8,11 @@ export class Delete {
     this.queryBuilder = driver(table).delete();
   }
 
+  withSchema(schemaName: string): Delete {
+    this.queryBuilder.withSchema(schemaName);
+    return this;
+  }
+
   where(condition: Condition): Delete {
     this.queryBuilder = this.queryBuilder.where((builder: QueryBuilder) => {
       generateWhere(builder, condition, condition.type);
